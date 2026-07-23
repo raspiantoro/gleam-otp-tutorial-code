@@ -16,7 +16,7 @@ Each tutorial chapter also has its own dedicated branch that represents the exac
 
 | Part | Status | Article | Branch |
 |------|--------|---------|--------|
-| 1. Building the Core | ⏳ Planned | - | - |
+| 1. Building the Core | 🚧 In Progress | - | - |
 | 1. Introduction to BEAM Process | ⏳ Planned | - | - |
 | 2. Building the First OTP Actor | ⏳ Planned | - | - |
 | 3. Creating a Simple REST API | ⏳ Planned | - | - |
@@ -63,12 +63,13 @@ gleam run
 
 ## Prerequisites
 
-Before following this tutorial series, make sure you have:
+This tutorial targets **Gleam running on the Erlang runtime (BEAM)**.
 
-- Erlang/OTP installed
-- Gleam installed
+Before getting started, follow the official installation guide to install Gleam and any required runtime dependencies for your platform:
 
-If you're completely new to Gleam, I highly recommend spending a couple of hours with the official Gleam Tour before starting this series.
+https://gleam.run/getting-started/installing/
+
+If you're new to Gleam, I also recommend spending a couple of hours with the official Gleam Tour before starting this series:
 
 https://tour.gleam.run/
 
