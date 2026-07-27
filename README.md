@@ -14,21 +14,21 @@ Each tutorial chapter also has its own dedicated branch that represents the exac
 
 ## Tutorial Series
 
-| Part | Status | Article | Branch |
+| Part | Status | Read | Code |
 |------|--------|---------|--------|
-| 1. Building the Core | 🚧 In Progress | - | - |
-| 1. Introduction to BEAM Process | ⏳ Planned | - | - |
-| 2. Building the First OTP Actor | ⏳ Planned | - | - |
-| 3. Creating a Simple REST API | ⏳ Planned | - | - |
-| 4. Managing Multiple Agents with Registry | ⏳ Planned | - | - |
-| 5. Supervising the Registry | ⏳ Planned | - | - |
-| 6. Spawning Multiple Agents with Factory Supervisor | ⏳ Planned | - | - |
-| 7. Persisting State to Recover from a Restart | ⏳ Planned | - | - |
-| 8. Distributing File Requests Across Multiple Actors | ⏳ Planned | - | - |
-| 9. Shutting Down Idle Agents Automatically | ⏳ Planned | - | - |
-| 10. Keeping the Registry in Sync When Agents Crash | ⏳ Planned | - | - |
-| 11. Loading Agent State Asynchronously | ⏳ Planned | - | - |
-| 12. Tying Everything Into an Erlang Application | ⏳ Planned | - | - |
+| 1. Designing the Initial System | ✅ Published | [Medium](https://medium.com/@marioraspiantoro/learn-gleam-otp-part-1-designing-the-initial-system-3c2813b51609) | [chapter-01](https://github.com/raspiantoro/gleam-otp-tutorial-code/tree/chapter-01) |
+| 2. Introduction to BEAM Process | ✍️ In Progress | - | - |
+| 3. Building the First OTP Actor | ⏳ Planned | - | - |
+| 4. Creating a Simple REST API | ⏳ Planned | - | - |
+| 5. Managing Multiple Agents with Registry | ⏳ Planned | - | - |
+| 6. Supervising the Registry | ⏳ Planned | - | - |
+| 7. Spawning Multiple Agents with Factory Supervisor | ⏳ Planned | - | - |
+| 8. Persisting State to Recover from a Restart | ⏳ Planned | - | - |
+| 9. Distributing File Requests Across Multiple Actors | ⏳ Planned | - | - |
+| 10. Shutting Down Idle Agents Automatically | ⏳ Planned | - | - |
+| 11. Keeping the Registry in Sync When Agents Crash | ⏳ Planned | - | - |
+| 12. Loading Agent State Asynchronously | ⏳ Planned | - | - |
+| 13. Tying Everything Into an Erlang Application | ⏳ Planned | - | - |
 
 > **Note**
 >
