@@ -1,15 +1,15 @@
-import gleam/dict
+import gleam/erlang/process
 import gleam/float
 import gleam/io
 import gleam/list
 import gleam/option
 import gleam/string
 import tempo/date
-import tracker/catalog
+import tracker/agent_process.{Add, GetAll, MonthlyDetail}
 import tracker/expense
 
-pub fn main() -> Nil {
-  let expense_catalog = catalog.new()
+pub fn main() {
+  let agent_subject = agent_process.run()
 
   let assert Ok(expense_date) = date.from_string("2026-7-21")
 
@@ -21,7 +21,7 @@ pub fn main() -> Nil {
       option.Some("Morning coffee"),
     )
 
-  let expense_catalog = catalog.add_expense(expense_catalog, create_expense)
+  process.send(agent_subject, Add(create_expense))
 
   let create_expense =
     expense.CreateExpense(
@@ -31,7 +31,7 @@ pub fn main() -> Nil {
       option.Some("Online course subscription"),
     )
 
-  let expense_catalog = catalog.add_expense(expense_catalog, create_expense)
+  process.send(agent_subject, Add(create_expense))
 
   let create_expense =
     expense.CreateExpense(
@@ -41,22 +41,26 @@ pub fn main() -> Nil {
       option.Some("Charity donation"),
     )
 
-  let expense_catalog = catalog.add_expense(expense_catalog, create_expense)
+  process.send(agent_subject, Add(create_expense))
+
+  process.call(agent_subject, 5000, GetAll)
+  |> list.each(fn(expense) { io.println(string.inspect(expense)) })
 
   let today = expense_date |> date.get_month_year
 
   io.println("monthly detail: ")
 
-  expense_catalog
-  |> catalog.monthly_detail(today.month, today.year)
-  |> dict.values
+  process.call(agent_subject, 5000, MonthlyDetail(today.month, today.year, _))
   |> list.each(fn(expense) { io.println(string.inspect(expense)) })
 
   io.println("monthly summary: ")
 
   let expense.Summary(total, categories_summary) =
-    expense_catalog
-    |> catalog.monthly_summary(today.month, today.year)
+    process.call(agent_subject, 5000, agent_process.MonthlySummary(
+      today.month,
+      today.year,
+      _,
+    ))
 
   io.println("total: " <> float.to_string(total))
   categories_summary

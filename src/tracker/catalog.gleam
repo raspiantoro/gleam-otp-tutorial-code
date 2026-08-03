@@ -7,7 +7,7 @@ import tracker/expense.{
   type CreateExpense, type Expense, type Summary, CategorySummary,
 }
 
-pub opaque type Catalog {
+pub type Catalog {
   Catalog(next_id: Int, expenses: dict.Dict(Int, Expense))
 }
 
@@ -44,47 +44,28 @@ pub fn monthly_summary(
   year year: Int,
 ) -> Summary {
   let monthly =
-    // monthly_detail returns a Dict(Int, Expense) — Int keys are the expense
-    // ids, already filtered down to this month/year
     monthly_detail(catalog, month, year)
-    // we only need the Expense values for the math below, so drop the ids
-    // and turn it into a plain List(Expense)
     |> dict.values
 
   let total =
     monthly
-    // list.fold walks the list one item at a time, carrying an accumulator
-    // forward. starts at 0.0, and for each entry adds its amount to acc —
-    // basically a running sum, same idea as reduce() if you know JS
     |> list.fold(0.0, fn(acc, entry) { acc +. entry.amount })
 
   let category_summaries =
     monthly
-    // map over every expense so we can adjust its category before grouping
     |> list.map(fn(entry) {
       let category = case entry.category {
-        // group all custom categories under one Other("Other") label so
-        // they show up as a single "Other" row in the summary instead of
-        // one row per custom string
         expense.Other(_) -> expense.Other("Other")
         _ -> entry.category
       }
 
-      // creates a new Expense with the same fields as entry,
-      // except using the updated category from above.
       expense.Expense(..entry, category:)
     })
-    // bucket the expenses into a Dict(Category, List(Expense)) based on
-    // the (now normalized) category field
     |> list.group(fn(entry) { entry.category })
-    // turn each bucket's list of expenses into a single total
     |> dict.map_values(fn(_, expenses) {
       list.fold(expenses, 0.0, fn(acc, entry) { acc +. entry.amount })
     })
-    // Dict(Category, Float) -> List(#(Category, Float)) so we can map it
-    // into our own record type next
     |> dict.to_list
-    // wrap each tuple into a proper CategorySummary
     |> list.map(fn(pair) { CategorySummary(category: pair.0, total: pair.1) })
 
   expense.Summary(total:, category_summaries:)
