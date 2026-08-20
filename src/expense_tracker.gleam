@@ -59,5 +59,7 @@ pub fn main() {
 
   io.println("total: " <> float.to_string(total))
   categories_summary
-  |> list.each(fn(expense) { io.println(string.inspect(expense)) })
+  |> list.each(fn(category_summary) {
+    io.println(string.inspect(category_summary))
+  })
 }
