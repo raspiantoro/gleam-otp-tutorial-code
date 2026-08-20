@@ -18,8 +18,8 @@ Each tutorial chapter also has its own dedicated branch that represents the exac
 |------|--------|---------|--------|
 | 1. Designing the Initial System | ✅ Published | [Medium](https://medium.com/@marioraspiantoro/learn-gleam-otp-part-1-designing-the-initial-system-3c2813b51609) | [chapter-01](https://github.com/raspiantoro/gleam-otp-tutorial-code/tree/chapter-01) |
 | 2. Introduction to BEAM Process | ✅ Published | [Medium](https://medium.com/@marioraspiantoro/learn-gleam-otp-part-2-introduction-to-beam-process-4f1e244b3a42) | [chapter-02](https://github.com/raspiantoro/gleam-otp-tutorial-code/tree/chapter-02) |
-| 3. Building the First OTP Actor | ✍️ In Progress | - | - |
-| 4. Creating a Simple REST API | ⏳ Planned | - | - |
+| 3. Building the First OTP Actor | ✅ Published | [Medium](https://medium.com/@marioraspiantoro/learn-gleam-otp-part-3-building-the-first-otp-actor-5629de7b7e0c) | [chapter-03](https://github.com/raspiantoro/gleam-otp-tutorial-code/tree/chapter-03) |
+| 4. Creating a Simple REST API | ✍️ In Progress | - | - |
 | 5. Managing Multiple Agents with Registry | ⏳ Planned | - | - |
 | 6. Supervising the Registry | ⏳ Planned | - | - |
 | 7. Spawning Multiple Agents with Factory Supervisor | ⏳ Planned | - | - |
