@@ -5,7 +5,7 @@ import gleam/list
 import gleam/option
 import gleam/string
 import tempo/date
-import tracker/agent_process.{Add, GetAll, MonthlyDetail}
+import tracker/agent_process.{Add, GetAll, MonthlyDetail, MonthlySummary}
 import tracker/expense
 
 pub fn main() {
@@ -56,11 +56,7 @@ pub fn main() {
   io.println("monthly summary: ")
 
   let expense.Summary(total, categories_summary) =
-    process.call(agent_subject, 5000, agent_process.MonthlySummary(
-      today.month,
-      today.year,
-      _,
-    ))
+    process.call(agent_subject, 5000, MonthlySummary(today.month, today.year, _))
 
   io.println("total: " <> float.to_string(total))
   categories_summary
