@@ -19,7 +19,7 @@ pub type Message {
 
 fn handle_message(state: catalog.Catalog, subject: Subject(Message)) {
   let new_state = case process.receive(subject, 5000) {
-    Ok(message) -> {
+    Ok(message) ->
       case message {
         Add(create_expense) -> {
           io.println("receive Add message: " <> string.inspect(create_expense))
@@ -45,7 +45,6 @@ fn handle_message(state: catalog.Catalog, subject: Subject(Message)) {
           state
         }
       }
-    }
     Error(_) -> state
   }
 
