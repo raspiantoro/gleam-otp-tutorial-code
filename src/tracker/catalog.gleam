@@ -15,12 +15,18 @@ pub fn new() -> Catalog {
   Catalog(1, dict.new())
 }
 
-pub fn add_expense(catalog: Catalog, expense: CreateExpense) -> Catalog {
+pub fn add_expense(
+  catalog: Catalog,
+  expense: CreateExpense,
+) -> #(Expense, Catalog) {
   let new_expense = expense.new(catalog.next_id, expense)
-  Catalog(
-    next_id: catalog.next_id + 1,
-    expenses: dict.insert(catalog.expenses, catalog.next_id, new_expense),
-  )
+  let catalog =
+    Catalog(
+      next_id: catalog.next_id + 1,
+      expenses: dict.insert(catalog.expenses, catalog.next_id, new_expense),
+    )
+
+  #(new_expense, catalog)
 }
 
 pub fn all(catalog: Catalog) -> dict.Dict(Int, Expense) {
