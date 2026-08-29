@@ -2,14 +2,11 @@ import config.{Config}
 import envoy
 import gleam/erlang/process
 import gleam/int
-import gleam/io
 import gleam/result
 import tracker/agent
 import web
 
 pub fn main() -> Nil {
-  io.println("Hello from expense_tracker!")
-
   let assert Ok(catalog_agent) = agent.start()
 
   let assert Ok(web_port) =

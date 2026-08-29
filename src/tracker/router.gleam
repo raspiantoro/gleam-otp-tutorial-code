@@ -1,6 +1,6 @@
 import config.{type Config}
 import gleam/dynamic/decode
-import gleam/http
+import gleam/http.{Get, Post}
 import gleam/json
 import gleam/result
 import tempo/date
@@ -15,10 +15,10 @@ pub fn handle_request(
   path_segments path: List(String),
 ) -> Response {
   case path, req.method {
-    [], http.Get -> get_all(cfg)
-    [], http.Post -> add_expense(cfg, req)
-    ["monthly"], http.Get -> get_monthly(cfg)
-    ["summary"], http.Get -> get_summary(cfg)
+    [], Get -> get_all(cfg)
+    [], Post -> add_expense(cfg, req)
+    ["monthly"], Get -> get_monthly(cfg)
+    ["summary"], Get -> get_summary(cfg)
     _, _ -> wisp.not_found()
   }
 }
@@ -46,7 +46,7 @@ fn add_expense(cfg: Config, req: Request) -> Response {
       codec.expense_to_json(created_expense)
       |> json.to_string
       |> wisp.json_response(200)
-    Error(_) -> wisp.bad_request("Invalid date format")
+    Error(_) -> wisp.bad_request("Invalid request body")
   }
 }
 
