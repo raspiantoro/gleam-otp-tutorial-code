@@ -1,65 +1,22 @@
-import gleam/float
-import gleam/io
-import gleam/list
-import gleam/option
-import gleam/string
-import tempo/date
+import config.{Config}
+import envoy
+import gleam/erlang/process
+import gleam/int
+import gleam/result
 import tracker/agent
-import tracker/expense
+import web
 
-pub fn main() {
-  let assert Ok(catalog_agent) = agent.start()
+pub fn main() -> Nil {
+  let assert Ok(web_port) =
+    envoy.get("WEB_PORT")
+    |> result.unwrap("8080")
+    |> int.parse
+    as "WEB_PORT must be a valid integer"
 
-  let assert Ok(expense_date) = date.from_string("2026-7-21")
+  let assert Ok(catalog_agent) = agent.start() as "failed to start the agent"
 
-  let create_expense =
-    expense.CreateExpense(
-      4.5,
-      expense.category_from_string("Food"),
-      expense_date,
-      option.Some("Morning coffee"),
-    )
+  let config = Config(web_port:, agent: catalog_agent)
+  let assert Ok(_) = web.start(config) as "failed to start the web server"
 
-  agent.add_expense(catalog_agent, create_expense)
-
-  let create_expense =
-    expense.CreateExpense(
-      49.0,
-      expense.category_from_string("Education"),
-      expense_date,
-      option.Some("Online course subscription"),
-    )
-
-  agent.add_expense(catalog_agent, create_expense)
-
-  let create_expense =
-    expense.CreateExpense(
-      20.0,
-      expense.category_from_string("Gift"),
-      date.literal("2026-7-22"),
-      option.Some("Charity donation"),
-    )
-
-  agent.add_expense(catalog_agent, create_expense)
-
-  agent.get_all(catalog_agent)
-  |> list.each(fn(expense) { io.println(string.inspect(expense)) })
-
-  let today = expense_date |> date.get_month_year
-
-  io.println("monthly detail: ")
-
-  agent.monthly_detail(catalog_agent, today.month, today.year)
-  |> list.each(fn(expense) { io.println(string.inspect(expense)) })
-
-  io.println("monthly summary: ")
-
-  let expense.Summary(total, categories_summary) =
-    agent.monthly_summary(catalog_agent, today.month, today.year)
-
-  io.println("total: " <> float.to_string(total))
-  categories_summary
-  |> list.each(fn(category_summary) {
-    io.println(string.inspect(category_summary))
-  })
+  process.sleep_forever()
 }

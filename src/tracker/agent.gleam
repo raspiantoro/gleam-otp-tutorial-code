@@ -1,5 +1,6 @@
 import gleam/dict
 import gleam/erlang/process.{type Subject}
+import gleam/io
 import gleam/otp/actor
 import gleam/result
 import gleam/time/calendar
@@ -9,7 +10,7 @@ import tracker/expense.{type CreateExpense, type Expense, type Summary}
 const timeout = 5000
 
 pub opaque type Message {
-  Add(CreateExpense)
+  Add(CreateExpense, Subject(Expense))
   GetAll(Subject(List(Expense)))
   MonthlyDetail(
     month: calendar.Month,
@@ -24,8 +25,9 @@ pub fn handle_message(
   message: Message,
 ) -> actor.Next(Catalog, Message) {
   case message {
-    Add(create_expense) -> {
-      let new_state = catalog.add_expense(state, create_expense)
+    Add(create_expense, reply_to) -> {
+      let #(new_expense, new_state) = catalog.add_expense(state, create_expense)
+      actor.send(reply_to, new_expense)
       actor.continue(new_state)
     }
 
@@ -50,6 +52,8 @@ pub fn handle_message(
 }
 
 pub fn start() -> Result(Subject(Message), actor.StartError) {
+  io.println("Starting agent")
+
   let state = catalog.new()
 
   actor.new(state)
@@ -58,8 +62,11 @@ pub fn start() -> Result(Subject(Message), actor.StartError) {
   |> result.map(fn(started_actor) { started_actor.data })
 }
 
-pub fn add_expense(agent: Subject(Message), create_expense: CreateExpense) {
-  actor.send(agent, Add(create_expense))
+pub fn add_expense(
+  agent: Subject(Message),
+  create_expense: CreateExpense,
+) -> Expense {
+  actor.call(agent, timeout, Add(create_expense, _))
 }
 
 pub fn get_all(agent: Subject(Message)) -> List(Expense) {

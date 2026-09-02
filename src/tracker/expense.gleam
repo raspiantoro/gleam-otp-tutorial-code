@@ -22,6 +22,16 @@ pub fn category_from_string(category: String) -> Category {
   }
 }
 
+pub fn category_to_string(category: Category) -> String {
+  case category {
+    Food -> "Food"
+    Transport -> "Transport"
+    Entertainment -> "Entertainment"
+    Health -> "Health"
+    Other(_) -> "Other"
+  }
+}
+
 pub type CategorySummary {
   CategorySummary(category: Category, total: Float)
 }
