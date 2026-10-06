@@ -8,11 +8,12 @@ import wisp/wisp_mist
 pub fn start(cfg: Config) {
   io.println("Starting web server")
 
-  handler(cfg, _)
-  |> wisp_mist.handler("")
-  |> mist.new
-  |> mist.port(cfg.web_port)
-  |> mist.start
+  let _web_server =
+    handler(cfg, _)
+    |> wisp_mist.handler("")
+    |> mist.new
+    |> mist.port(cfg.web_port)
+    |> mist.start
 }
 
 pub fn handler(cfg: Config, req: Request) -> Response {

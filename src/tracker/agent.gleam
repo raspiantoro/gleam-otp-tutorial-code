@@ -1,3 +1,4 @@
+import constants
 import gleam/dict
 import gleam/erlang/process.{type Subject}
 import gleam/io
@@ -7,7 +8,8 @@ import gleam/time/calendar
 import tracker/catalog.{type Catalog}
 import tracker/expense.{type CreateExpense, type Expense, type Summary}
 
-const timeout = 5000
+pub type AgentSubject =
+  Subject(Message)
 
 pub opaque type Message {
   Add(CreateExpense, Subject(Expense))
@@ -66,11 +68,11 @@ pub fn add_expense(
   agent: Subject(Message),
   create_expense: CreateExpense,
 ) -> Expense {
-  actor.call(agent, timeout, Add(create_expense, _))
+  actor.call(agent, constants.timeout, Add(create_expense, _))
 }
 
 pub fn get_all(agent: Subject(Message)) -> List(Expense) {
-  actor.call(agent, timeout, GetAll)
+  actor.call(agent, constants.timeout, GetAll)
 }
 
 pub fn monthly_detail(
@@ -78,7 +80,7 @@ pub fn monthly_detail(
   month month: calendar.Month,
   year year: Int,
 ) -> List(Expense) {
-  actor.call(agent, timeout, MonthlyDetail(month, year, _))
+  actor.call(agent, constants.timeout, MonthlyDetail(month, year, _))
 }
 
 pub fn monthly_summary(
@@ -86,5 +88,5 @@ pub fn monthly_summary(
   month month: calendar.Month,
   year year: Int,
 ) -> Summary {
-  actor.call(agent, timeout, MonthlySummary(month, year, _))
+  actor.call(agent, constants.timeout, MonthlySummary(month, year, _))
 }

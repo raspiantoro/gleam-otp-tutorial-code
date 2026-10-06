@@ -1,12 +1,13 @@
 import config.{type Config}
 import gleam/dynamic/decode
-import gleam/http.{Get, Post}
+import gleam/http
 import gleam/json
 import gleam/result
 import tempo/date
 import tempo/instant
 import tracker/agent
 import tracker/codec
+import tracker/registry
 import wisp.{type Request, type Response}
 
 pub fn handle_request(
@@ -15,30 +16,37 @@ pub fn handle_request(
   path_segments path: List(String),
 ) -> Response {
   case path, req.method {
-    [], Get -> get_all(cfg)
-    [], Post -> add_expense(cfg, req)
-    ["monthly"], Get -> get_monthly(cfg)
-    ["summary"], Get -> get_summary(cfg)
+    ["monthly"], _ | ["summary"], _ -> wisp.not_found()
+    [tracker_name], http.Get -> get_all(cfg, tracker_name)
+    [tracker_name], http.Post -> add_expense(cfg, req, tracker_name)
+    [tracker_name, "monthly"], http.Get -> get_monthly(cfg, tracker_name)
+    [tracker_name, "summary"], http.Get -> get_summary(cfg, tracker_name)
     _, _ -> wisp.not_found()
   }
 }
 
-fn get_all(cfg: Config) -> Response {
-  agent.get_all(cfg.agent)
-  |> json.array(codec.expense_to_json)
-  |> json.to_string
-  |> wisp.json_response(200)
+fn get_all(cfg: Config, tracker_name: String) -> Response {
+  case registry.get_agent(cfg.registry, tracker_name) {
+    Error(_) -> wisp.internal_server_error()
+    Ok(agent) ->
+      agent.get_all(agent)
+      |> json.array(codec.expense_to_json)
+      |> json.to_string
+      |> wisp.json_response(200)
+  }
 }
 
-fn add_expense(cfg: Config, req: Request) -> Response {
+fn add_expense(cfg: Config, req: Request, tracker_name: String) -> Response {
   use body <- wisp.require_json(req)
   let created_expense = {
+    use agent <- result.try(registry.get_agent(cfg.registry, tracker_name))
+
     use create_expense <- result.try(decode.run(
       body,
       codec.create_expense_decoder(),
     ))
 
-    Ok(agent.add_expense(cfg.agent, create_expense))
+    Ok(agent.add_expense(agent, create_expense))
   }
 
   case created_expense {
@@ -46,30 +54,38 @@ fn add_expense(cfg: Config, req: Request) -> Response {
       codec.expense_to_json(created_expense)
       |> json.to_string
       |> wisp.json_response(200)
-    Error(_) -> wisp.bad_request("Invalid request body")
+    Error(_) -> wisp.bad_request("Invalid date format")
   }
 }
 
-fn get_monthly(cfg: Config) -> Response {
+fn get_monthly(cfg: Config, tracker_name: String) -> Response {
   let today =
     instant.now()
     |> instant.as_local_date
     |> date.get_month_year
 
-  agent.monthly_detail(cfg.agent, today.month, today.year)
-  |> json.array(codec.expense_to_json)
-  |> json.to_string
-  |> wisp.json_response(200)
+  case registry.get_agent(cfg.registry, tracker_name) {
+    Error(_) -> wisp.internal_server_error()
+    Ok(agent) ->
+      agent.monthly_detail(agent, today.month, today.year)
+      |> json.array(codec.expense_to_json)
+      |> json.to_string
+      |> wisp.json_response(200)
+  }
 }
 
-fn get_summary(cfg: Config) -> Response {
+fn get_summary(cfg: Config, tracker_name: String) -> Response {
   let today =
     instant.now()
     |> instant.as_local_date
     |> date.get_month_year
 
-  agent.monthly_summary(cfg.agent, today.month, today.year)
-  |> codec.expense_summary_to_json
-  |> json.to_string
-  |> wisp.json_response(200)
+  case registry.get_agent(cfg.registry, tracker_name) {
+    Error(_) -> wisp.internal_server_error()
+    Ok(agent) ->
+      agent.monthly_summary(agent, today.month, today.year)
+      |> codec.expense_summary_to_json
+      |> json.to_string
+      |> wisp.json_response(200)
+  }
 }
