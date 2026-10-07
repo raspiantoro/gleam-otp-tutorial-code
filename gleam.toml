@@ -20,8 +20,8 @@ wisp = ">= 2.2.2 and < 3.0.0"
 mist = ">= 6.0.3 and < 7.0.0"
 gleam_http = ">= 4.3.0 and < 5.0.0"
 gleam_json = ">= 3.1.0 and < 4.0.0"
-gleam_time = ">= 1.8.0 and < 2.0.0"
 gtempo = ">= 7.3.0 and < 8.0.0"
+gleam_time = ">= 1.8.0 and < 2.0.0"
 envoy = ">= 1.2.0 and < 2.0.0"
 
 [dev-dependencies]

@@ -1,6 +1,6 @@
 import gleam/erlang/process.{type Subject}
-import tracker/agent.{type Message}
+import tracker/registry.{type Message}
 
 pub type Config {
-  Config(web_port: Int, agent: Subject(Message))
+  Config(web_port: Int, registry: Subject(Message))
 }

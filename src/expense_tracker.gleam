@@ -3,7 +3,7 @@ import envoy
 import gleam/erlang/process
 import gleam/int
 import gleam/result
-import tracker/agent
+import tracker/registry
 import web
 
 pub fn main() -> Nil {
@@ -13,10 +13,12 @@ pub fn main() -> Nil {
     |> int.parse
     as "WEB_PORT must be a valid integer"
 
-  let assert Ok(catalog_agent) = agent.start() as "failed to start the agent"
+  let assert Ok(agent_registry) = registry.start()
+    as "failed to start the registry"
 
-  let config = Config(web_port:, agent: catalog_agent)
-  let assert Ok(_) = web.start(config) as "failed to start the web server"
+  let config = Config(web_port:, registry: agent_registry)
+
+  let assert Ok(_) = web.start(config) as "cannot start web server"
 
   process.sleep_forever()
 }
