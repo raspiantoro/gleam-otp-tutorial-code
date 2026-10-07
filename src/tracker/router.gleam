@@ -39,12 +39,15 @@ fn get_all(cfg: Config, tracker_name: String) -> Response {
 fn add_expense(cfg: Config, req: Request, tracker_name: String) -> Response {
   use body <- wisp.require_json(req)
   let created_expense = {
-    use agent <- result.try(registry.get_agent(cfg.registry, tracker_name))
+    use agent <- result.try(
+      registry.get_agent(cfg.registry, tracker_name)
+      |> result.replace_error(wisp.internal_server_error()),
+    )
 
-    use create_expense <- result.try(decode.run(
-      body,
-      codec.create_expense_decoder(),
-    ))
+    use create_expense <- result.try(
+      decode.run(body, codec.create_expense_decoder())
+      |> result.replace_error(wisp.bad_request("Invalid request body")),
+    )
 
     Ok(agent.add_expense(agent, create_expense))
   }
@@ -54,7 +57,7 @@ fn add_expense(cfg: Config, req: Request, tracker_name: String) -> Response {
       codec.expense_to_json(created_expense)
       |> json.to_string
       |> wisp.json_response(200)
-    Error(_) -> wisp.bad_request("Invalid date format")
+    Error(error_response) -> error_response
   }
 }
 

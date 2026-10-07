@@ -4,26 +4,14 @@ import gleam/erlang/process.{type Subject}
 import gleam/io
 import gleam/otp/actor
 import gleam/result
-import tracker/agent
+import tracker/agent.{type AgentSubject}
 
 pub opaque type Message {
-  GetAgent(String, Subject(Result(Subject(agent.Message), actor.StartError)))
+  GetAgent(String, Subject(Result(AgentSubject, actor.StartError)))
 }
 
-pub fn handle_message(
-  state: dict.Dict(String, Subject(agent.Message)),
-  message: Message,
-) -> actor.Next(dict.Dict(String, Subject(agent.Message)), Message) {
-  case message {
-    GetAgent(name, reply_to) ->
-      dict.get(state, name)
-      |> result.map(fn(agent) {
-        actor.send(reply_to, Ok(agent))
-        actor.continue(state)
-      })
-      |> result.lazy_unwrap(fn() { handle_start_agent(name, state, reply_to) })
-  }
-}
+type State =
+  dict.Dict(String, AgentSubject)
 
 pub fn start() -> Result(Subject(Message), actor.StartError) {
   io.println("Starting registry")
@@ -36,21 +24,38 @@ pub fn start() -> Result(Subject(Message), actor.StartError) {
 
 pub fn get_agent(
   subject: Subject(Message),
-  name: String,
-) -> Result(Subject(agent.Message), actor.StartError) {
-  actor.call(subject, constants.timeout, GetAgent(name, _))
+  tracker_name: String,
+) -> Result(AgentSubject, actor.StartError) {
+  actor.call(subject, constants.timeout, GetAgent(tracker_name, _))
+}
+
+fn handle_message(
+  state: State,
+  message: Message,
+) -> actor.Next(State, Message) {
+  case message {
+    GetAgent(tracker_name, reply_to) ->
+      dict.get(state, tracker_name)
+      |> result.map(fn(agent) {
+        actor.send(reply_to, Ok(agent))
+        actor.continue(state)
+      })
+      |> result.lazy_unwrap(fn() {
+        handle_start_agent(tracker_name, state, reply_to)
+      })
+  }
 }
 
 fn handle_start_agent(
-  name: String,
-  state: dict.Dict(String, Subject(agent.Message)),
-  reply_to: Subject(Result(Subject(agent.Message), actor.StartError)),
-) -> actor.Next(dict.Dict(String, Subject(agent.Message)), Message) {
+  tracker_name: String,
+  state: State,
+  reply_to: Subject(Result(AgentSubject, actor.StartError)),
+) -> actor.Next(State, Message) {
   let state =
     agent.start()
     |> result.map(fn(agent) {
       actor.send(reply_to, Ok(agent))
-      dict.insert(state, name, agent)
+      dict.insert(state, tracker_name, agent)
     })
     |> result.map_error(fn(error) { actor.send(reply_to, Error(error)) })
     |> result.unwrap(state)

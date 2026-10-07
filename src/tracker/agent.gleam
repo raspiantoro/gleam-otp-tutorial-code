@@ -22,7 +22,7 @@ pub opaque type Message {
   MonthlySummary(month: calendar.Month, year: Int, reply_to: Subject(Summary))
 }
 
-pub fn handle_message(
+fn handle_message(
   state: Catalog,
   message: Message,
 ) -> actor.Next(Catalog, Message) {
