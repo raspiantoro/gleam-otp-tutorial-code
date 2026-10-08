@@ -3,23 +3,40 @@ import gleam/dict
 import gleam/erlang/process.{type Subject}
 import gleam/io
 import gleam/otp/actor
+import gleam/otp/supervision
 import gleam/result
 import tracker/agent.{type AgentSubject}
 
 pub opaque type Message {
   GetAgent(String, Subject(Result(AgentSubject, actor.StartError)))
+  Down
 }
 
 type State =
   dict.Dict(String, AgentSubject)
 
-pub fn start() -> Result(Subject(Message), actor.StartError) {
-  io.println("Starting registry")
+pub fn start(
+  name: process.Name(Message),
+) -> fn() -> Result(actor.Started(Subject(Message)), actor.StartError) {
+  fn() {
+    io.println("Starting registry")
 
-  actor.new(dict.new())
-  |> actor.on_message(handle_message)
-  |> actor.start
-  |> result.map(fn(started_actor) { started_actor.data })
+    actor.new(dict.new())
+    |> actor.on_message(handle_message)
+    |> actor.named(name)
+    |> actor.start
+  }
+}
+
+pub fn supervised(
+  name: process.Name(Message),
+) -> supervision.ChildSpecification(Subject(Message)) {
+  supervision.ChildSpecification(
+    start: start(name),
+    restart: supervision.Permanent,
+    significant: False,
+    child_type: supervision.Worker(constants.timeout),
+  )
 }
 
 pub fn get_agent(
@@ -27,6 +44,10 @@ pub fn get_agent(
   tracker_name: String,
 ) -> Result(AgentSubject, actor.StartError) {
   actor.call(subject, constants.timeout, GetAgent(tracker_name, _))
+}
+
+pub fn down(subject: Subject(Message)) {
+  actor.send(subject, Down)
 }
 
 fn handle_message(
@@ -43,6 +64,11 @@ fn handle_message(
       |> result.lazy_unwrap(fn() {
         handle_start_agent(tracker_name, state, reply_to)
       })
+
+    Down -> {
+      io.println("Terminating registry")
+      actor.stop()
+    }
   }
 }
 
