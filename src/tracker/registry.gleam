@@ -15,29 +15,52 @@ pub opaque type Message {
 type State =
   dict.Dict(String, AgentSubject)
 
-pub fn start(
-  name: process.Name(Message),
-) -> fn() -> Result(actor.Started(Subject(Message)), actor.StartError) {
+pub fn start() -> fn() ->
+  Result(actor.Started(Subject(Message)), actor.StartError) {
   fn() {
     io.println("Starting registry")
 
     actor.new(dict.new())
     |> actor.on_message(handle_message)
-    |> actor.named(name)
     |> actor.start
   }
 }
 
-pub fn supervised(
-  name: process.Name(Message),
-) -> supervision.ChildSpecification(Subject(Message)) {
+// pub fn start(
+//   reply_to: Subject(Subject(Message)),
+// ) -> fn() -> Result(actor.Started(Subject(Message)), actor.StartError) {
+//   fn() {
+//     io.println("Starting registry")
+
+//     actor.new(dict.new())
+//     |> actor.on_message(handle_message)
+//     |> actor.start
+//     |> result.map(fn(started_actor) {
+//       process.send(reply_to, started_actor.data)
+//       started_actor
+//     })
+//   }
+// }
+
+pub fn supervised() -> supervision.ChildSpecification(Subject(Message)) {
   supervision.ChildSpecification(
-    start: start(name),
+    start: start(),
     restart: supervision.Permanent,
     significant: False,
     child_type: supervision.Worker(constants.timeout),
   )
 }
+
+// pub fn supervised(
+//   reply_to: Subject(Subject(Message)),
+// ) -> supervision.ChildSpecification(Subject(Message)) {
+//   supervision.ChildSpecification(
+//     start: start(reply_to),
+//     restart: supervision.Permanent,
+//     significant: False,
+//     child_type: supervision.Worker(constants.timeout),
+//   )
+// }
 
 pub fn get_agent(
   subject: Subject(Message),

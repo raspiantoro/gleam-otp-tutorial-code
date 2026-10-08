@@ -1,21 +1,13 @@
-import config.{type Config, Config}
+import config.{Config}
 import envoy
 import gleam/erlang/process
 import gleam/int
-import gleam/io
-import gleam/otp/actor
-import gleam/otp/static_supervisor.{type Supervisor}
+import gleam/otp/static_supervisor
 import gleam/result
 import tracker/system
 import web
 
-fn start_supervision_tree(config: Config) -> actor.StartResult(Supervisor) {
-  io.println("Starting main supervision tree")
-  static_supervisor.new(static_supervisor.OneForOne)
-  |> static_supervisor.add(system.start_supervision_tree(config))
-  |> static_supervisor.add(web.supervised(config))
-  |> static_supervisor.start
-}
+import constants
 
 pub fn main() -> Nil {
   let assert Ok(web_port) =
@@ -24,11 +16,26 @@ pub fn main() -> Nil {
     |> int.parse
     as "WEB_PORT must be a valid integer"
 
-  let config =
-    Config(web_port:, registry_name: process.new_name("registry_actor"))
+  // let reply_subject = process.new_subject()
 
-  let assert Ok(_) = start_supervision_tree(config)
-    as "failed to start supervision tree"
+  // let assert Ok(_) =
+  //   static_supervisor.new(static_supervisor.OneForOne)
+  //   |> static_supervisor.add(system.start_supervision_tree(reply_subject))
+  //   |> static_supervisor.start
+  //   as "failed to start supervisor"
+
+  let assert Ok(_) =
+    static_supervisor.new(static_supervisor.OneForOne)
+    |> static_supervisor.add(system.start_supervision_tree())
+    |> static_supervisor.start
+    as "failed to start supervisor"
+
+  // let assert Ok(agent_registry) =
+  //   process.receive(reply_subject, constants.timeout)
+
+  let config = Config(web_port:, registry: agent_registry)
+
+  let assert Ok(_) = web.start(config) as "cannot start web server"
 
   process.sleep_forever()
 }
