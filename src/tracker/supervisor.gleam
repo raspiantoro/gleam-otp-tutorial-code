@@ -9,6 +9,9 @@ pub fn supervised(config: Config) -> ChildSpecification(Supervisor) {
   io.println("Starting tracker supervision tree")
 
   static_supervisor.new(OneForOne)
-  |> static_supervisor.add(registry.supervised(config.registry_name))
+  |> static_supervisor.add(registry.supervised(
+    config.registry_name,
+    config.agent_factory_name,
+  ))
   |> static_supervisor.supervised
 }
