@@ -1,6 +1,6 @@
 import constants
 import gleam/dict
-import gleam/erlang/process.{type Subject}
+import gleam/erlang/process.{type Name, type Subject}
 import gleam/io
 import gleam/otp/actor
 import gleam/otp/supervision
@@ -16,7 +16,7 @@ type State =
   dict.Dict(String, AgentSubject)
 
 pub fn start(
-  name: process.Name(Message),
+  name: Name(Message),
 ) -> fn() -> Result(actor.Started(Subject(Message)), actor.StartError) {
   fn() {
     io.println("Starting registry")
@@ -29,14 +29,9 @@ pub fn start(
 }
 
 pub fn supervised(
-  name: process.Name(Message),
+  name: Name(Message),
 ) -> supervision.ChildSpecification(Subject(Message)) {
-  supervision.ChildSpecification(
-    start: start(name),
-    restart: supervision.Permanent,
-    significant: False,
-    child_type: supervision.Worker(constants.timeout),
-  )
+  supervision.worker(start(name))
 }
 
 pub fn get_agent(

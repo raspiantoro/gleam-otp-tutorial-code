@@ -1,12 +1,11 @@
-import config
 import gleam/io
 import gleam/otp/static_supervisor.{type Supervisor, OneForOne}
 import gleam/otp/supervision.{type ChildSpecification}
+
+import config.{type Config}
 import tracker/registry
 
-pub fn start_supervision_tree(
-  config: config.Config,
-) -> ChildSpecification(Supervisor) {
+pub fn supervised(config: Config) -> ChildSpecification(Supervisor) {
   io.println("Starting tracker supervision tree")
 
   static_supervisor.new(OneForOne)

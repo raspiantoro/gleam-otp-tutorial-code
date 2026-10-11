@@ -1,6 +1,6 @@
-import gleam/erlang/process
+import gleam/erlang/process.{type Name}
 import tracker/registry.{type Message}
 
 pub type Config {
-  Config(web_port: Int, registry_name: process.Name(Message))
+  Config(web_port: Int, registry_name: Name(Message))
 }

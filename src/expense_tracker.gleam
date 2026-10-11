@@ -1,18 +1,20 @@
-import config.{type Config, Config}
 import envoy
 import gleam/erlang/process
 import gleam/int
+import gleam/result
+import tracker/supervisor as tracker_supervisor
+import web
+
+import config.{type Config, Config}
 import gleam/io
 import gleam/otp/actor
 import gleam/otp/static_supervisor.{type Supervisor}
-import gleam/result
-import tracker/system
-import web
 
 fn start_supervision_tree(config: Config) -> actor.StartResult(Supervisor) {
-  io.println("Starting main supervision tree")
+  io.println("Starting supervision tree")
+
   static_supervisor.new(static_supervisor.OneForOne)
-  |> static_supervisor.add(system.start_supervision_tree(config))
+  |> static_supervisor.add(tracker_supervisor.supervised(config))
   |> static_supervisor.add(web.supervised(config))
   |> static_supervisor.start
 }
