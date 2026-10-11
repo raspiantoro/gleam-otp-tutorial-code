@@ -3,7 +3,6 @@ import gleam/dict
 import gleam/erlang/process.{type Subject}
 import gleam/io
 import gleam/otp/actor
-import gleam/result
 import gleam/time/calendar
 import tracker/catalog.{type Catalog}
 import tracker/expense.{type CreateExpense, type Expense, type Summary}
@@ -22,10 +21,12 @@ pub opaque type Message {
   MonthlySummary(month: calendar.Month, year: Int, reply_to: Subject(Summary))
 }
 
-fn handle_message(
+pub fn handle_message(
   state: Catalog,
   message: Message,
 ) -> actor.Next(Catalog, Message) {
+  process.trap_exits(True)
+
   case message {
     Add(create_expense, reply_to) -> {
       let #(new_expense, new_state) = catalog.add_expense(state, create_expense)
@@ -53,15 +54,19 @@ fn handle_message(
   }
 }
 
-pub fn start() -> Result(Subject(Message), actor.StartError) {
-  io.println("Starting agent")
+// factory_supervisor required worker start function with one argument
+// for now we put String arg with name and then only print it since we are not using it
+// but on next chapter we will use it to integrate with storage actor
+pub fn start(
+  name: String,
+) -> Result(actor.Started(Subject(Message)), actor.StartError) {
+  io.println("Starting agent: " <> name)
 
   let state = catalog.new()
 
   actor.new(state)
   |> actor.on_message(handle_message)
   |> actor.start
-  |> result.map(fn(started_actor) { started_actor.data })
 }
 
 pub fn add_expense(
