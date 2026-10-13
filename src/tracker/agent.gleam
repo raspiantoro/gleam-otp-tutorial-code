@@ -27,12 +27,10 @@ pub opaque type Message {
   MonthlySummary(month: calendar.Month, year: Int, reply_to: Subject(Summary))
 }
 
-pub fn handle_message(
+fn handle_message(
   state: Catalog,
   message: Message,
 ) -> actor.Next(Catalog, Message) {
-  process.trap_exits(True)
-
   case message {
     Add(create_expense, reply_to) -> {
       let #(new_expense, new_state) = catalog.add_expense(state, create_expense)
@@ -72,7 +70,7 @@ pub fn start(
   |> actor.start
 }
 
-pub fn factory_spec(agent_factory_name: AgentFactoryName) {
+pub fn supervised(agent_factory_name: AgentFactoryName) {
   factory_supervisor.worker_child(start)
   |> factory_supervisor.named(agent_factory_name)
   |> factory_supervisor.restart_strategy(supervision.Temporary)

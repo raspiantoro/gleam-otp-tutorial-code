@@ -11,7 +11,7 @@ pub fn supervised(config: Config) -> ChildSpecification(Supervisor) {
 
   let agent_hub_supervisor =
     static_supervisor.new(static_supervisor.OneForAll)
-    |> static_supervisor.add(agent.factory_spec(config.agent_factory_name))
+    |> static_supervisor.add(agent.supervised(config.agent_factory_name))
     |> static_supervisor.add(
       supervision.worker(registry.start(
         config.registry_name,
