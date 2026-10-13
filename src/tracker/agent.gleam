@@ -3,9 +3,15 @@ import gleam/dict
 import gleam/erlang/process.{type Subject}
 import gleam/io
 import gleam/otp/actor
+import gleam/otp/supervision
 import gleam/time/calendar
 import tracker/catalog.{type Catalog}
 import tracker/expense.{type CreateExpense, type Expense, type Summary}
+
+import gleam/otp/factory_supervisor.{type Message as FactoryMessage}
+
+pub type AgentFactoryName =
+  process.Name(FactoryMessage(String, AgentSubject))
 
 pub type AgentSubject =
   Subject(Message)
@@ -54,9 +60,6 @@ pub fn handle_message(
   }
 }
 
-// factory_supervisor required worker start function with one argument
-// for now we put String arg with name and then only print it since we are not using it
-// but on next chapter we will use it to integrate with storage actor
 pub fn start(
   name: String,
 ) -> Result(actor.Started(Subject(Message)), actor.StartError) {
@@ -67,6 +70,13 @@ pub fn start(
   actor.new(state)
   |> actor.on_message(handle_message)
   |> actor.start
+}
+
+pub fn factory_spec(agent_factory_name: AgentFactoryName) {
+  factory_supervisor.worker_child(start)
+  |> factory_supervisor.named(agent_factory_name)
+  |> factory_supervisor.restart_strategy(supervision.Temporary)
+  |> factory_supervisor.supervised
 }
 
 pub fn add_expense(

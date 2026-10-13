@@ -29,7 +29,7 @@ pub fn handle_request(
 
 fn get_all(cfg: Config, tracker_name: String) -> Response {
   let subject = process.named_subject(cfg.registry_name)
-  let agent = registry.get_agent(subject, cfg.agent_factory_name, tracker_name)
+  let agent = registry.get_agent(subject, tracker_name)
 
   case agent {
     Error(_) -> wisp.internal_server_error()
@@ -47,7 +47,7 @@ fn add_expense(cfg: Config, req: Request, tracker_name: String) -> Response {
     let subject = process.named_subject(cfg.registry_name)
 
     let agent_result =
-      registry.get_agent(subject, cfg.agent_factory_name, tracker_name)
+      registry.get_agent(subject, tracker_name)
       |> result.replace_error(wisp.internal_server_error())
 
     use agent <- result.try(agent_result)
@@ -76,7 +76,7 @@ fn get_monthly(cfg: Config, tracker_name: String) -> Response {
     |> date.get_month_year
 
   let subject = process.named_subject(cfg.registry_name)
-  let agent = registry.get_agent(subject, cfg.agent_factory_name, tracker_name)
+  let agent = registry.get_agent(subject, tracker_name)
 
   case agent {
     Error(_) -> wisp.internal_server_error()
@@ -95,7 +95,7 @@ fn get_summary(cfg: Config, tracker_name: String) -> Response {
     |> date.get_month_year
 
   let subject = process.named_subject(cfg.registry_name)
-  let agent = registry.get_agent(subject, cfg.agent_factory_name, tracker_name)
+  let agent = registry.get_agent(subject, tracker_name)
 
   case agent {
     Error(_) -> wisp.internal_server_error()
