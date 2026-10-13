@@ -17,8 +17,7 @@ pub fn handle_request(
   path_segments path: List(String),
 ) -> Response {
   case path, req.method {
-    ["monthly"], _ -> wisp.not_found()
-    ["summary"], _ -> wisp.not_found()
+    ["monthly"], _ | ["summary"], _ -> wisp.not_found()
     [tracker_name], http.Get -> get_all(cfg, tracker_name)
     [tracker_name], http.Post -> add_expense(cfg, req, tracker_name)
     [tracker_name, "monthly"], http.Get -> get_monthly(cfg, tracker_name)
@@ -29,9 +28,8 @@ pub fn handle_request(
 
 fn get_all(cfg: Config, tracker_name: String) -> Response {
   let subject = process.named_subject(cfg.registry_name)
-  let agent = registry.get_agent(subject, tracker_name)
 
-  case agent {
+  case registry.get_agent(subject, tracker_name) {
     Error(_) -> wisp.internal_server_error()
     Ok(agent) ->
       agent.get_all(agent)
@@ -46,15 +44,14 @@ fn add_expense(cfg: Config, req: Request, tracker_name: String) -> Response {
   let created_expense = {
     let subject = process.named_subject(cfg.registry_name)
 
-    let agent_result =
+    use agent <- result.try(
       registry.get_agent(subject, tracker_name)
-      |> result.replace_error(wisp.internal_server_error())
-
-    use agent <- result.try(agent_result)
+      |> result.replace_error(wisp.internal_server_error()),
+    )
 
     use create_expense <- result.try(
       decode.run(body, codec.create_expense_decoder())
-      |> result.replace_error(wisp.bad_request("Invalid date format YYYY-MM-DD")),
+      |> result.replace_error(wisp.bad_request("Invalid request body")),
     )
 
     Ok(agent.add_expense(agent, create_expense))
@@ -76,9 +73,8 @@ fn get_monthly(cfg: Config, tracker_name: String) -> Response {
     |> date.get_month_year
 
   let subject = process.named_subject(cfg.registry_name)
-  let agent = registry.get_agent(subject, tracker_name)
 
-  case agent {
+  case registry.get_agent(subject, tracker_name) {
     Error(_) -> wisp.internal_server_error()
     Ok(agent) ->
       agent.monthly_detail(agent, today.month, today.year)
@@ -95,9 +91,8 @@ fn get_summary(cfg: Config, tracker_name: String) -> Response {
     |> date.get_month_year
 
   let subject = process.named_subject(cfg.registry_name)
-  let agent = registry.get_agent(subject, tracker_name)
 
-  case agent {
+  case registry.get_agent(subject, tracker_name) {
     Error(_) -> wisp.internal_server_error()
     Ok(agent) ->
       agent.monthly_summary(agent, today.month, today.year)
