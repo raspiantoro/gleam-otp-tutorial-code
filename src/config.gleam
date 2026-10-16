@@ -1,6 +1,7 @@
 import gleam/erlang/process
-import tracker/agent.{type AgentFactoryName}
 import tracker/registry.{type Message as RegistryMessage}
+
+import tracker/agent.{type AgentFactoryName}
 
 pub type Config {
   Config(

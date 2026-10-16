@@ -1,11 +1,12 @@
 import constants
 import gleam/dict
-import gleam/erlang/process.{type Subject}
+import gleam/erlang/process.{type Name, type Subject}
 import gleam/io
 import gleam/otp/actor
-import gleam/otp/factory_supervisor
 import gleam/otp/supervision
 import gleam/result
+
+import gleam/otp/factory_supervisor
 import tracker/agent.{type AgentFactoryName, type AgentSubject}
 
 pub opaque type Message {
@@ -21,7 +22,7 @@ type State {
 }
 
 pub fn start(
-  name: process.Name(Message),
+  name: Name(Message),
   agent_factory_name: AgentFactoryName,
 ) -> fn() -> Result(actor.Started(Subject(Message)), actor.StartError) {
   fn() {
@@ -35,7 +36,7 @@ pub fn start(
 }
 
 pub fn supervised(
-  name: process.Name(Message),
+  name: Name(Message),
   agent_factory_name: AgentFactoryName,
 ) -> supervision.ChildSpecification(Subject(Message)) {
   supervision.worker(start(name, agent_factory_name))
