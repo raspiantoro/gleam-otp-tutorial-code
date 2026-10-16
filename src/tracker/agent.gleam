@@ -3,7 +3,6 @@ import gleam/dict
 import gleam/erlang/process.{type Subject}
 import gleam/io
 import gleam/otp/actor
-import gleam/otp/supervision
 import gleam/time/calendar
 import tracker/catalog.{type Catalog}
 import tracker/expense.{type CreateExpense, type Expense, type Summary}
@@ -73,7 +72,6 @@ pub fn start(
 pub fn supervised(agent_factory_name: AgentFactoryName) {
   factory_supervisor.worker_child(start)
   |> factory_supervisor.named(agent_factory_name)
-  |> factory_supervisor.restart_strategy(supervision.Temporary)
   |> factory_supervisor.supervised
 }
 

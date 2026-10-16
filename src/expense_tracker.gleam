@@ -18,7 +18,7 @@ fn start_supervision_tree(config: Config) -> actor.StartResult(Supervisor) {
   |> static_supervisor.start
 }
 
-pub fn main() -> Nil {
+pub fn start() {
   let assert Ok(web_port) =
     envoy.get("WEB_PORT")
     |> result.unwrap("8080")
@@ -35,5 +35,10 @@ pub fn main() -> Nil {
   let assert Ok(_) = start_supervision_tree(config)
     as "failed to start supervision tree"
 
+  Nil
+}
+
+pub fn main() -> Nil {
+  start()
   process.sleep_forever()
 }
