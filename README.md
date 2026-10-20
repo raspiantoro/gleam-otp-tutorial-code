@@ -21,8 +21,8 @@ Each tutorial chapter also has its own dedicated branch that represents the exac
 | 3. Building the First OTP Actor | ✅ Published | [Medium](https://medium.com/@marioraspiantoro/learn-gleam-otp-part-3-building-the-first-otp-actor-5629de7b7e0c) | [chapter-03](https://github.com/raspiantoro/gleam-otp-tutorial-code/tree/chapter-03) |
 | 4. Creating a Simple REST API | ✅ Published | [Medium](https://medium.com/@marioraspiantoro/learn-gleam-otp-part-4-creating-a-simple-rest-api-c638435d4ce5) | [chapter-04](https://github.com/raspiantoro/gleam-otp-tutorial-code/tree/chapter-04) |
 | 5. Managing Multiple Agents with Registry | ✅ Published | [Medium](https://medium.com/@marioraspiantoro/learn-gleam-otp-part-5-managing-multiple-agents-with-registry-51dfcfb94120) | [chapter-05](https://github.com/raspiantoro/gleam-otp-tutorial-code/tree/chapter-05) |
-| 6. Supervising the Registry | ✍️ In Progress | - | - |
-| 7. Spawning Multiple Agents with Factory Supervisor | ⏳ Planned | - | - |
+| 6. Supervising the Registry | ✅ Published | [Medium](https://medium.com/@marioraspiantoro/learn-gleam-otp-part-6-supervising-the-registry-031f9f1fe7a3) | [chapter-06](https://github.com/raspiantoro/gleam-otp-tutorial-code/tree/chapter-06) |
+| 7. Spawning Multiple Agents with Factory Supervisor | ✍️ In Progress | - | - |
 | 8. Persisting State to Recover from a Restart | ⏳ Planned | - | - |
 | 9. Distributing File Requests Across Multiple Actors | ⏳ Planned | - | - |
 | 10. Shutting Down Idle Agents Automatically | ⏳ Planned | - | - |

@@ -1,5 +1,6 @@
 import config.{type Config}
 import gleam/dynamic/decode
+import gleam/erlang/process
 import gleam/http
 import gleam/json
 import gleam/result
@@ -26,7 +27,9 @@ pub fn handle_request(
 }
 
 fn get_all(cfg: Config, tracker_name: String) -> Response {
-  case registry.get_agent(cfg.registry, tracker_name) {
+  let subject = process.named_subject(cfg.registry_name)
+
+  case registry.get_agent(subject, tracker_name) {
     Error(_) -> wisp.internal_server_error()
     Ok(agent) ->
       agent.get_all(agent)
@@ -39,8 +42,10 @@ fn get_all(cfg: Config, tracker_name: String) -> Response {
 fn add_expense(cfg: Config, req: Request, tracker_name: String) -> Response {
   use body <- wisp.require_json(req)
   let created_expense = {
+    let subject = process.named_subject(cfg.registry_name)
+
     use agent <- result.try(
-      registry.get_agent(cfg.registry, tracker_name)
+      registry.get_agent(subject, tracker_name)
       |> result.replace_error(wisp.internal_server_error()),
     )
 
@@ -67,7 +72,9 @@ fn get_monthly(cfg: Config, tracker_name: String) -> Response {
     |> instant.as_local_date
     |> date.get_month_year
 
-  case registry.get_agent(cfg.registry, tracker_name) {
+  let subject = process.named_subject(cfg.registry_name)
+
+  case registry.get_agent(subject, tracker_name) {
     Error(_) -> wisp.internal_server_error()
     Ok(agent) ->
       agent.monthly_detail(agent, today.month, today.year)
@@ -83,7 +90,9 @@ fn get_summary(cfg: Config, tracker_name: String) -> Response {
     |> instant.as_local_date
     |> date.get_month_year
 
-  case registry.get_agent(cfg.registry, tracker_name) {
+  let subject = process.named_subject(cfg.registry_name)
+
+  case registry.get_agent(subject, tracker_name) {
     Error(_) -> wisp.internal_server_error()
     Ok(agent) ->
       agent.monthly_summary(agent, today.month, today.year)
