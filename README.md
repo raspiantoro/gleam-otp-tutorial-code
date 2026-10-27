@@ -22,8 +22,8 @@ Each tutorial chapter also has its own dedicated branch that represents the exac
 | 4. Creating a Simple REST API | ✅ Published | [Medium](https://medium.com/@marioraspiantoro/learn-gleam-otp-part-4-creating-a-simple-rest-api-c638435d4ce5) | [chapter-04](https://github.com/raspiantoro/gleam-otp-tutorial-code/tree/chapter-04) |
 | 5. Managing Multiple Agents with Registry | ✅ Published | [Medium](https://medium.com/@marioraspiantoro/learn-gleam-otp-part-5-managing-multiple-agents-with-registry-51dfcfb94120) | [chapter-05](https://github.com/raspiantoro/gleam-otp-tutorial-code/tree/chapter-05) |
 | 6. Supervising the Registry | ✅ Published | [Medium](https://medium.com/@marioraspiantoro/learn-gleam-otp-part-6-supervising-the-registry-031f9f1fe7a3) | [chapter-06](https://github.com/raspiantoro/gleam-otp-tutorial-code/tree/chapter-06) |
-| 7. Spawning Multiple Agents with Factory Supervisor | ✍️ In Progress | - | - |
-| 8. Persisting State to Recover from a Restart | ⏳ Planned | - | - |
+| 7. Spawning Multiple Agents with Factory Supervisor | ✅ Published | [Medium](https://medium.com/@marioraspiantoro/learn-gleam-otp-part-7-spawning-multiple-agents-with-a-factory-supervisor-f0edeead9acd) | [chapter-07](https://github.com/raspiantoro/gleam-otp-tutorial-code/tree/chapter-07) |
+| 8. Persisting State to Recover from a Restart | ✍️ In Progress | - | - |
 | 9. Distributing File Requests Across Multiple Actors | ⏳ Planned | - | - |
 | 10. Shutting Down Idle Agents Automatically | ⏳ Planned | - | - |
 | 11. Keeping the Registry in Sync When Agents Crash | ⏳ Planned | - | - |

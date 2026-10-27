@@ -5,23 +5,30 @@ import gleam/io
 import gleam/otp/actor
 import gleam/otp/supervision
 import gleam/result
-import tracker/agent.{type AgentSubject}
+
+import gleam/otp/factory_supervisor
+import tracker/agent.{type AgentFactoryName, type AgentSubject}
 
 pub opaque type Message {
   GetAgent(String, Subject(Result(AgentSubject, actor.StartError)))
   Down
 }
 
-type State =
-  dict.Dict(String, AgentSubject)
+type State {
+  State(
+    agent_factory_name: AgentFactoryName,
+    agents: dict.Dict(String, AgentSubject),
+  )
+}
 
 pub fn start(
   name: Name(Message),
+  agent_factory_name: AgentFactoryName,
 ) -> fn() -> Result(actor.Started(Subject(Message)), actor.StartError) {
   fn() {
     io.println("Starting registry")
 
-    actor.new(dict.new())
+    actor.new(State(agent_factory_name:, agents: dict.new()))
     |> actor.on_message(handle_message)
     |> actor.named(name)
     |> actor.start
@@ -30,8 +37,9 @@ pub fn start(
 
 pub fn supervised(
   name: Name(Message),
+  agent_factory_name: AgentFactoryName,
 ) -> supervision.ChildSpecification(Subject(Message)) {
-  supervision.worker(start(name))
+  supervision.worker(start(name, agent_factory_name))
 }
 
 pub fn get_agent(
@@ -51,7 +59,7 @@ fn handle_message(
 ) -> actor.Next(State, Message) {
   case message {
     GetAgent(tracker_name, reply_to) ->
-      dict.get(state, tracker_name)
+      dict.get(state.agents, tracker_name)
       |> result.map(fn(agent) {
         actor.send(reply_to, Ok(agent))
         actor.continue(state)
@@ -72,14 +80,17 @@ fn handle_start_agent(
   state: State,
   reply_to: Subject(Result(AgentSubject, actor.StartError)),
 ) -> actor.Next(State, Message) {
-  let state =
-    agent.start()
-    |> result.map(fn(agent) {
-      actor.send(reply_to, Ok(agent))
-      dict.insert(state, tracker_name, agent)
-    })
-    |> result.map_error(fn(error) { actor.send(reply_to, Error(error)) })
-    |> result.unwrap(state)
-
-  actor.continue(state)
+  factory_supervisor.get_by_name(state.agent_factory_name)
+  |> factory_supervisor.start_child(tracker_name)
+  |> result.map(fn(agent) {
+    actor.send(reply_to, Ok(agent.data))
+    actor.continue(
+      State(
+        ..state,
+        agents: dict.insert(state.agents, tracker_name, agent.data),
+      ),
+    )
+  })
+  |> result.map_error(fn(error) { actor.send(reply_to, Error(error)) })
+  |> result.unwrap(actor.continue(state))
 }

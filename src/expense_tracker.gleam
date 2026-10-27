@@ -1,14 +1,13 @@
+import config.{type Config, Config}
 import envoy
 import gleam/erlang/process
 import gleam/int
-import gleam/result
-import tracker/supervisor as tracker_supervisor
-import web
-
-import config.{type Config, Config}
 import gleam/io
 import gleam/otp/actor
 import gleam/otp/static_supervisor.{type Supervisor}
+import gleam/result
+import tracker/supervisor as tracker_supervisor
+import web
 
 fn start_supervision_tree(config: Config) -> actor.StartResult(Supervisor) {
   io.println("Starting supervision tree")
@@ -19,7 +18,7 @@ fn start_supervision_tree(config: Config) -> actor.StartResult(Supervisor) {
   |> static_supervisor.start
 }
 
-pub fn main() -> Nil {
+pub fn start() {
   let assert Ok(web_port) =
     envoy.get("WEB_PORT")
     |> result.unwrap("8080")
@@ -27,10 +26,19 @@ pub fn main() -> Nil {
     as "WEB_PORT must be a valid integer"
 
   let config =
-    Config(web_port:, registry_name: process.new_name("registry_actor"))
+    Config(
+      web_port:,
+      registry_name: process.new_name("registry_actor"),
+      agent_factory_name: process.new_name("agent_factory"),
+    )
 
   let assert Ok(_) = start_supervision_tree(config)
     as "failed to start supervision tree"
 
+  Nil
+}
+
+pub fn main() -> Nil {
+  start()
   process.sleep_forever()
 }

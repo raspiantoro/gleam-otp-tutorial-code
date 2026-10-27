@@ -3,10 +3,14 @@ import gleam/dict
 import gleam/erlang/process.{type Subject}
 import gleam/io
 import gleam/otp/actor
-import gleam/result
 import gleam/time/calendar
 import tracker/catalog.{type Catalog}
 import tracker/expense.{type CreateExpense, type Expense, type Summary}
+
+import gleam/otp/factory_supervisor.{type Message as FactoryMessage}
+
+pub type AgentFactoryName =
+  process.Name(FactoryMessage(String, AgentSubject))
 
 pub type AgentSubject =
   Subject(Message)
@@ -53,15 +57,22 @@ fn handle_message(
   }
 }
 
-pub fn start() -> Result(Subject(Message), actor.StartError) {
-  io.println("Starting agent")
+pub fn start(
+  name: String,
+) -> Result(actor.Started(Subject(Message)), actor.StartError) {
+  io.println("Starting agent: " <> name)
 
   let state = catalog.new()
 
   actor.new(state)
   |> actor.on_message(handle_message)
   |> actor.start
-  |> result.map(fn(started_actor) { started_actor.data })
+}
+
+pub fn supervised(agent_factory_name: AgentFactoryName) {
+  factory_supervisor.worker_child(start)
+  |> factory_supervisor.named(agent_factory_name)
+  |> factory_supervisor.supervised
 }
 
 pub fn add_expense(
